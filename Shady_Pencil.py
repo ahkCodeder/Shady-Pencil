@@ -55,7 +55,7 @@ merge_distance = 0.0100
 auto_delete_sub_layers = False
 
 # where the transform should start IMP
-set_start_frame = 0
+start_frame = 0
 
 # DEBUG MODE
 #bpy.app.debug_wm = False
@@ -71,6 +71,7 @@ if not bpy.context.active_object == 'GPENCIL':
 
 bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
 bpy.data.objects[gp_obj_name].select_set(True)
+bpy.data.scenes[0].frame_current = start_frame
 
 bpy.data.scenes['Scene'].view_layers['ViewLayer'].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
@@ -158,7 +159,7 @@ def context_swap(area_type=""):
     
     return override_context
 
-def convert_GP(gp_obj_name='',output_collection='',interpolation_type = 'CONSTANT',merge_distance = 0.0401,set_start_frame = 0,layer='',away_from_frame_distance=away_from_frame_distance): 
+def convert_GP(gp_obj_name='',output_collection='',interpolation_type = 'CONSTANT',merge_distance = 0.0401,layer='',away_from_frame_distance=away_from_frame_distance): 
     
     override_context = context_swap("VIEW_3D")
 
@@ -233,7 +234,6 @@ convert_GP(
         output_collection,
         interpolation_type,
         merge_distance,
-        set_start_frame,
         layer=regular_layer)
 
 
@@ -251,7 +251,6 @@ if not sub_layer == '':
         sub_output_collection,
         interpolation_type,
         merge_distance,
-        set_start_frame,
         layer=sub_layer)
 
     for sub in bpy.data.collections[sub_output_collection].objects:
