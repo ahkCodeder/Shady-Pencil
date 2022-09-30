@@ -10,6 +10,8 @@ import bpy
 
 # 2 SETTINGS NEED TO BE RIGHT FOR WITH WHAT YOU WANT AND THE RIGHT COLLECTIONS TO OUTPUT TO 
 
+# 3 MAKE SURE YOU HAVE A STROKE ON THE START FRAME OF THE ANIMATION OR YOU CAN GET A CONTEXT ERROR
+
 # 3 EXPORT INTO !! EMPTY COLLECTIONS !!
 
 """
@@ -33,13 +35,13 @@ regular_layer = 'shadeing'
 output_collection = 'dss'
 
 # MAKE A SPERATE LAYER ON THE SAME GPENCIL THAT MAKES HOLES POSSIBLE
-sub_layer = 'd'
+sub_layer = ''
 
 # if the sub traction and makeing holes increase if or low if it dose not make the holes
 sub_layer_extrution_amount = 1
 
 # where the subtraction gets outputed to if in cluded
-sub_output_collection = 'subtraction'
+sub_output_collection = ''
 
 # MODE BETWEEN THE FRAMES 'CONSTANT' TO GET A MORE ANIMATION LOOK TO IT
 interpolation_type = 'CONSTANT'
