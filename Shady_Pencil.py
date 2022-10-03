@@ -75,7 +75,7 @@ bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
 bpy.data.objects[gp_obj_name].select_set(True)
 bpy.data.scenes[0].frame_current = start_frame
 
-bpy.data.scenes['Scene'].view_layers['ViewLayer'].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
+bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
 def convert_curves_to_filled_mesh(output_collection,merge_distance):
 
@@ -177,7 +177,7 @@ def convert_GP(gp_obj_name='',output_collection='',interpolation_type = 'CONSTAN
         
         bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[layer]
         current_frame = bpy.data.scenes[0].frame_current
-        bpy.data.scenes['Scene'].view_layers['ViewLayer'].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
+        bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
         bpy.ops.gpencil.convert(override_context,type='CURVE', use_timing_data=False)
 
         bpy.data.objects[gp_obj_name].select_set(False)
@@ -246,7 +246,7 @@ if not sub_layer == '':
 
     override_context = context_swap("OUTLINER")
 
-    bpy.data.scenes['Scene'].view_layers['ViewLayer'].active_layer_collection = bpy.data.scenes['Scene'].view_layers['ViewLayer'].layer_collection.children['subtraction']
+    bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].layer_collection.children['subtraction']
 
     convert_GP(
         gp_obj_name,
