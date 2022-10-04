@@ -440,8 +440,6 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             bpy.data.collections[bpy.context.scene.sub_output_collection]
             bpy.data.objects[bpy.context.scene.gp_obj_name]
 
-        sub.modifiers.new(name='SOLIDIFY',type='SOLIDIFY')
-
         except:
             print("FAILED")
             return False
