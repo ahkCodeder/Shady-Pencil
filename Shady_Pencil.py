@@ -1,3 +1,16 @@
+bl_info = {
+    "name": "Shady Pencil",
+    "author": "AHK <https://github.com/ahkCodeder>",
+    "version": (1,0),
+    "blender": (3,3,0),
+    "category": "Add Grease Pencil",
+    "location": "",
+    "description": "This turns Grease pencil strokes into Mesh Objects",
+    "warning": "Lines can't be turned to Mesh obj",
+    "doc_url": "https://github.com/ahkCodeder",
+    "tracer_url": ""
+}
+
 import bpy
 """
 ########################## REQUIERMENTS ###########################################
