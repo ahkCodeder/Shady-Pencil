@@ -439,7 +439,10 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             bpy.data.collections[bpy.context.scene.output_collection]
             bpy.data.collections[bpy.context.scene.sub_output_collection]
             bpy.data.objects[bpy.context.scene.gp_obj_name]
-
+            
+            # Check to see if output collections are empty
+            if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0 or len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
+                return False
         except:
             print("FAILED")
             return False
