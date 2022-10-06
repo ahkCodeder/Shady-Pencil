@@ -346,9 +346,9 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 
         col.prop(context.scene, 'sub_layer')
         
-        col.prop(context.scene,'sub_layer_extrution_amount')
-        
         col.prop(context.scene,'sub_output_collection')
+        
+        col.prop(context.scene,'sub_layer_extrution_amount')
         
         col.prop(context.scene,'merge_distance')
         
