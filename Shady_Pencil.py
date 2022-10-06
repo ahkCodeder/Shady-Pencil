@@ -25,8 +25,6 @@ import bpy
 
 # 3 MAKE SURE YOU HAVE A STROKE ON THE START FRAME OF THE ANIMATION OR YOU CAN GET A CONTEXT ERROR
 
-# 3 EXPORT INTO !! EMPTY COLLECTIONS !!
-
 """
 ########################## END OF REQUIERMENTS ###########################################
 """
@@ -437,14 +435,22 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
 
         try:
             bpy.data.collections[bpy.context.scene.output_collection]
-            bpy.data.collections[bpy.context.scene.sub_output_collection]
             bpy.data.objects[bpy.context.scene.gp_obj_name]
             
             # Check to see if output collections are empty
-            if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0 or len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
+            if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0:
                 return False
         except:
-            print("FAILED")
+            return False
+
+        try:
+
+            if bpy.context.scene.sub_output_collection == '':
+                return True
+
+            elif len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
+                return False
+        except:
             return False
 
         return True
