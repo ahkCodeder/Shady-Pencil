@@ -264,7 +264,7 @@ def Shady_Pencil(gp_obj_name='',regular_layer='',output_collection='',sub_layer=
 
         override_context = context_swap("OUTLINER")
 
-        bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].layer_collection.children['subtraction']
+        bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].layer_collection.children[sub_output_collection]
 
         convert_GP(
             gp_obj_name,
