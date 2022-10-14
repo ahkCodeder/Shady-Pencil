@@ -105,44 +105,27 @@ def Shady_Pencil(gp_obj_name='',regular_layer='',output_collection='',sub_layer=
             if  bpy.data.objects[obj.name].type == 'CURVE':
 
                 bpy.ops.object.convert(target='MESH')
-                bpy.ops.object.editmode_toggle()
-
-                bpy.ops.mesh.select_all() 
+                
+                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.mesh.select_all(action='SELECT') 
                 bpy.ops.mesh.remove_doubles(threshold=merge_distance, use_sharp_edge_from_normals=False)
-                bpy.ops.object.editmode_toggle()
+                bpy.ops.object.mode_set(mode = 'OBJECT')
 
-                bpy.context.view_layer.objects.active = obj
-                bpy.data.objects[obj.name].select_set(True)
+                bpy.ops.object.convert(target='CURVE')
+                
+                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.curve.select_all(action='SELECT')
+                bpy.ops.curve.cyclic_toggle()
+                bpy.ops.object.mode_set(mode = 'OBJECT')
 
-                index_of_looped = [0]
+                bpy.ops.object.convert(target='MESH')
 
-                vert_index_limit = len(bpy.context.object.data.vertices)   
+                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.edge_face_add()
+                bpy.ops.object.mode_set(mode = 'OBJECT')
 
-                while True: 
-
-                    if vert_index_limit == len(bpy.context.object.data.vertices.data.loops):
-                        break
-                    
-                    current_index = len(bpy.context.object.data.vertices.data.loops)
-
-                    if current_index > vert_index_limit:
-                        break
-                    
-                    bpy.ops.object.mode_set(mode = 'EDIT')
-                    bpy.ops.mesh.select_mode(type="VERT")
-                    bpy.ops.mesh.select_all(action = 'DESELECT')
-                    bpy.ops.object.mode_set(mode = 'OBJECT')
-
-                    bpy.context.object.data.vertices[current_index].select = True    
-
-                    bpy.ops.object.editmode_toggle()
-                    bpy.ops.mesh.select_linked(delimit=set())
-                    bpy.ops.mesh.edge_face_add()
-                    bpy.ops.object.editmode_toggle()
-
-                    bpy.context.object.data.vertices[current_index].select = False
-
-            bpy.data.objects[obj.name].select_set(False)
+                bpy.data.objects[obj.name].select_set(False) 
 
 
     def hide_none_active_obj(output_collection):
