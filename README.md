@@ -16,5 +16,5 @@ i have a 4670k and my animation that i created take **25 sec** to run
 
 ## HOW TO USE 
 
-go watch this youtube video of a demo NO AUDIO 
-[![Shady Pencil]()](https://www.youtube.com/watch?v=R8ORBKLLykw)
+go watch this youtube video of a demo sorry for the bad audio ill fix it in the future
+[![Shady Pencil]()]((https://youtu.be/7wY5nFMHoSI))
