@@ -426,8 +426,8 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     start_frame: bpy.props.IntProperty(
                             name="start_frame",
                             description="start frame for the script to run on.",
-                            default=00,
-                            min=1,
+                            default=0,
+                            min=0,
                             max=2000)
             
     @classmethod
@@ -524,7 +524,7 @@ def register():
                             name="start_frame",
                             description="start frame for the script to run on.",
                             default=0,
-                            min=1,
+                            min=0,
                             max=2000)
                              
     bpy.utils.register_class(VIEW3D_PT_GP_Shady_Pencil)
