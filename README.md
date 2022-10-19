@@ -2,6 +2,9 @@
 convert blender grease pencil animations to mesh animations to use the shader editor
 
 ## **WARNING**
+
+** IMPORTANT NEW UPDATE WATCH THE VIDEO IN HOW TO USE IF IT'S NOT WORKING FOR YOU MIGTH HELP **
+
 the code is slow and can be unstable save often so you down loss you're progress
 i have a 4670k and my animation that i created take **25 sec** to run 
 
