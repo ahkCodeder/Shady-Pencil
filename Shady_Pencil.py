@@ -80,7 +80,7 @@ start_frame = 0
 """
 def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collection='',sub_layer='',sub_layer_extrution_amount=1,sub_output_collection='',
                                 merge_distance = 0.0100,auto_delete_sub_layers = False,start_frame = 1,close_curves=False,extrusion_length = 0.01):
-    
+
     away_from_frame_distance = (0,0,10000000000)
 
     interpolation_type = 'CONSTANT'
@@ -178,7 +178,7 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
             name_of_GP_Stroke = bpy.context.object.data.name
 
             bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[layer]
-            current_frame = bpy.data.scenes[0].frame_current
+
             bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
             bpy.ops.gpencil.convert(override_context,type='CURVE', use_timing_data=False)
 
@@ -246,9 +246,11 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
 
                 obj.select_set(False)
 
-        if MODE == "GEOMETRY":
-            print("DID")
+        if MODE == "GEOMETRY" and not sub_layer == layer:
+
             for obj in bpy.data.collections[output_collection].objects:
+
+                obj.select_set(True)
 
                 obj.modifiers.new(name='SOLIDIFY',type='SOLIDIFY')
                 obj.modifiers['SOLIDIFY'].offset = 0
@@ -256,6 +258,8 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
     
                 bpy.context.view_layer.objects.active = obj
                 bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
+
+                obj.select_set(False)
 
     convert_GP(
             gp_obj_name,
@@ -273,6 +277,7 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
         override_context = context_swap("OUTLINER")
 
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].layer_collection.children[sub_output_collection]
+        bpy.data.scenes[0].frame_current = start_frame
 
         convert_GP(
             gp_obj_name,
@@ -310,7 +315,7 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
 
                     used_sub.append(sub.name)
 
-            bpy.context.view_layer.objects.active = bpy.data.collections[gp_obj_name].objects[gp_obj_name]
+            #bpy.context.view_layer.objects.active = bpy.data.collections[gp_obj_name].objects[gp_obj_name]
             bpy.ops.screen.keyframe_jump()
 
     index = 0
