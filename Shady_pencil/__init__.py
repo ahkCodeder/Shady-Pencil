@@ -10,7 +10,6 @@ bl_info = {
     "doc_url": "https://github.com/ahkCodeder"
 }
 
-import bpy
 from Shady_pencil import operator, panel
 
 def register():

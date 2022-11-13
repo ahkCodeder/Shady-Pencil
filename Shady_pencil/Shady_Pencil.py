@@ -302,7 +302,6 @@ def Shady_Pencil(MODE = "DEFAULT", gp_obj_name='',regular_layer='',output_collec
 
                     used_sub.append(sub.name)
 
-            #bpy.context.view_layer.objects.active = bpy.data.collections[gp_obj_name].objects[gp_obj_name]
             bpy.ops.screen.keyframe_jump()
 
     index = 0
