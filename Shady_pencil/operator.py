@@ -101,7 +101,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     def execute(self, context):
         
         if self.poll(self):
-            Shady_Pencil(gp_obj_name = self.gp_obj_name,
+            Shady_Pencil.Shady_Pencil(gp_obj_name = self.gp_obj_name,
                         regular_layer = self.regular_layer,
                         output_collection = self.output_collection,
                         sub_layer = self.sub_layer,
