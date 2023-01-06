@@ -16,7 +16,7 @@ i have a 4670k and my animation that i created take **25 sec** to run
 1. Click the Code dropdown on github page
 2. Download Zip
 3. unzip and run the **Shady_Pencil.py** file in blender
-4. move the **Shady_pencil** forlder into the add on directory of you're blender install should be something like C:\programs\Blender Foundation\Blender 3.3\3.3\scripts\addons in windows For Some Reason **ZIP INSTALLS** don't work
+4. **move the *Shady_pencil* forlder into the add on directory of you're blender install should be something like C:\programs\Blender Foundation\Blender 3.3\3.3\scripts\addons in windows For Some Reason *ZIP INSTALLS* don't work**
 5. read the instructions
 
 ## INSTRUCTIONS
