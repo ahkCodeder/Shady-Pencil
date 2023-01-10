@@ -118,12 +118,34 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 
             props.sub_layer_extrution_amount = context.scene.sub_layer_extrution_amount
 
-        
+        elif props.MODE == "LINE":
+
+            col.prop(context.scene, 'gp_obj_name')
+
+            col.prop(context.scene, 'regular_layer')
+
+            col.prop(context.scene, 'output_collection')
+
+            col.prop(context.scene, 'merge_distance')
+
+            props.MODE = context.scene.MODE
+
+            props.gp_obj_name = context.scene.gp_obj_name
+
+            props.regular_layer = context.scene.regular_layer
+
+            # TODO :TOGGLE CYCLICIC: UPDATE IT IN FUTURE WHERE FALSE RESULTS IN CYCLIC CLOSE CUREVES
+            props.complex_convert = True
+
+            props.output_collection = context.scene.output_collection
+
+            props.merge_distance = context.scene.merge_distance
+
         elif props.MODE == "REPAIR":
             
             col.prop(context.scene, 'gp_obj_name')
 
-            col.prop(context.scene, 'layer')
+            col.prop(context.scene, 'regular_layer')
             
             col.prop(context.scene, 'complex_convert')
 
@@ -145,7 +167,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 def register():
 
     bpy.types.Scene.MODE = bpy.props.EnumProperty(items=[(
-        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR","")])
+        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR",""),("LINE","LINE","")])
 
     bpy.types.Scene.gp_obj_name = bpy.props.StringProperty(
         name="gp_obj_name",
