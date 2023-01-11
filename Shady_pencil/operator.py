@@ -9,7 +9,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     MODE: bpy.props.EnumProperty(items=[(
-        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR","")])
+        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR",""),("LINE","LINE","")])
 
     gp_obj_name: bpy.props.StringProperty(
         name="gp_obj_name",
