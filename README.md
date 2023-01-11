@@ -4,6 +4,7 @@ convert blender grease pencil animations to mesh animations to use the shader ed
 
 ## **IF YOU WANT TO SPONSOR THIS PROJECT**
 
+try it for free then if you want to sponsor you can use the link
 [**BLENDER MARKET**](https://blendermarket.com/products/grease-pencil-into-mesh-animations)
 
 ## **WARNING**
