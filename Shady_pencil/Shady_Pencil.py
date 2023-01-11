@@ -163,7 +163,7 @@ def context_swap(area_type=""):
 
         return override_context
 
-def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_distance=0.0401, layer='', away_from_frame_distance=away_from_frame_distance,extrusion_length = 0.01 ,complex_convert = True):
+def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_distance=0.0401, layer='', away_from_frame_distance=away_from_frame_distance,extrusion_length = 0.01 ,complex_convert = True,MODE=""):
 
         override_context = context_swap("VIEW_3D")
 
@@ -295,7 +295,8 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             merge_distance,
             layer=regular_layer,
             extrusion_length=extrusion_length,
-            complex_convert=complex_convert)
+            complex_convert=complex_convert,
+            MODE = MODE)
 
         if not sub_layer == '':
 
@@ -315,7 +316,8 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                 merge_distance,
                 layer=sub_layer,
                 extrusion_length=extrusion_length,
-                complex_convert=complex_convert)
+                complex_convert=complex_convert,
+                MODE = MODE)
 
             for sub in bpy.data.collections[sub_output_collection].objects:
 
