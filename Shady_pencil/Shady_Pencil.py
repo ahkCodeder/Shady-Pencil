@@ -60,54 +60,57 @@ auto_delete_sub_layers = False
 
 # TODO :: ADD LINE MODE Fill __ tool has been improved adding a new algorithm to close gaps.
 # TODO :: UPDATE ALL INSTRUCTION AND WHAT YOU NEED TO DO TO RUN THE CODE IN THE README.MD UPLOAD FULL TUTORICAL WHEN ALL IS DONE
-# TODO :: REFACTOR AND ERROR FIXES  :: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION 
+# TODO :: REFACTOR AND ERROR FIXES  :: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
 """
 ############################ END OF SETTING VARIABLES ##################################
 """
 
-def convert_curves_to_filled_mesh(output_collection, merge_distance,complex_convert):
+
+def convert_curves_to_filled_mesh(output_collection, merge_distance, complex_convert):
     if complex_convert:
         for obj in bpy.data.collections[output_collection].objects:
-        
+
             bpy.data.objects[obj.name].select_set(True)
             bpy.context.view_layer.objects.active = obj
-            if  bpy.data.objects[obj.name].type == 'CURVE':
-            
+            if bpy.data.objects[obj.name].type == 'CURVE':
+
                 bpy.ops.object.convert(target='MESH')
                 bpy.ops.object.editmode_toggle()
-                bpy.ops.mesh.select_all() 
-                bpy.ops.mesh.remove_doubles(threshold=merge_distance, use_sharp_edge_from_normals=False)
+                bpy.ops.mesh.select_all()
+                bpy.ops.mesh.remove_doubles(
+                    threshold=merge_distance, use_sharp_edge_from_normals=False)
                 bpy.ops.object.editmode_toggle()
                 bpy.context.view_layer.objects.active = obj
                 bpy.data.objects[obj.name].select_set(True)
-                vert_index_limit = len(bpy.context.object.data.vertices)   
-                while True: 
-                
+                vert_index_limit = len(bpy.context.object.data.vertices)
+                while True:
+
                     if vert_index_limit == len(bpy.context.object.data.vertices.data.loops):
                         break
-                    
-                    current_index = len(bpy.context.object.data.vertices.data.loops)
+
+                    current_index = len(
+                        bpy.context.object.data.vertices.data.loops)
                     if current_index > vert_index_limit:
                         break
-                    
-                    bpy.ops.object.mode_set(mode = 'EDIT')
+
+                    bpy.ops.object.mode_set(mode='EDIT')
                     bpy.ops.mesh.select_mode(type="VERT")
-                    bpy.ops.mesh.select_all(action = 'DESELECT')
-                    bpy.ops.object.mode_set(mode = 'OBJECT')
-                    bpy.context.object.data.vertices[current_index].select = True    
+                    bpy.ops.mesh.select_all(action='DESELECT')
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                    bpy.context.object.data.vertices[current_index].select = True
                     bpy.ops.object.editmode_toggle()
                     bpy.ops.mesh.select_linked(delimit=set())
                     bpy.ops.mesh.edge_face_add()
                     bpy.ops.object.editmode_toggle()
                     bpy.context.object.data.vertices[current_index].select = False
-            
+
             bpy.data.objects[obj.name].select_set(False)
     else:
         for obj in bpy.data.collections[output_collection].objects:
             bpy.data.objects[obj.name].select_set(True)
             bpy.context.view_layer.objects.active = obj
             if bpy.data.objects[obj.name].type == 'CURVE':
-                
+
                 bpy.ops.object.convert(target='MESH')
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_all(action='SELECT')
@@ -119,15 +122,16 @@ def convert_curves_to_filled_mesh(output_collection, merge_distance,complex_conv
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.curve.select_all(action='SELECT')
                 bpy.ops.curve.cyclic_toggle()
-                
+
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.ops.object.convert(target='MESH')
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.edge_face_add()
-                
+
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.data.objects[obj.name].select_set(False)
+
 
 def hide_none_active_obj(output_collection):
     for key_obj in bpy.data.collections[output_collection].objects[1:]:
@@ -147,66 +151,71 @@ def hide_none_active_obj(output_collection):
         except:
             bpy.data.objects[selected_key_obj].select_set(False)
 
+
 def context_swap(area_type=""):
 
-        if area_type == "":
-            print("no type given")
+    if area_type == "":
+        print("no type given")
 
-        override_context = bpy.context.copy()
-        area = [area for area in bpy.context.screen.areas if area.type == area_type][0]
-        override_context['window'] = bpy.context.window
-        override_context['screen'] = bpy.context.screen
-        override_context['area'] = area
-        override_context['region'] = area.regions[-1]
-        override_context['scene'] = bpy.context.scene
-        override_context['space_data'] = area.spaces.active
+    override_context = bpy.context.copy()
+    area = [area for area in bpy.context.screen.areas if area.type == area_type][0]
+    override_context['window'] = bpy.context.window
+    override_context['screen'] = bpy.context.screen
+    override_context['area'] = area
+    override_context['region'] = area.regions[-1]
+    override_context['scene'] = bpy.context.scene
+    override_context['space_data'] = area.spaces.active
 
-        return override_context
+    return override_context
 
-def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_distance=0.0401, layer='', away_from_frame_distance=away_from_frame_distance,extrusion_length = 0.01 ,complex_convert = True,MODE=""):
 
-        override_context = context_swap("VIEW_3D")
+def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_distance=0.0401, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE=""):
 
-        if not 'FINISHED' in bpy.ops.object.mode_set(mode='OBJECT'):
-            print('FAILED TO ENTER OBJECT MODE')
+    override_context = context_swap("VIEW_3D")
 
-        key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_distance, override_context)
+    if not 'FINISHED' in bpy.ops.object.mode_set(mode='OBJECT'):
+        print('FAILED TO ENTER OBJECT MODE')
 
-        bpy.context.scene.frame_set(0)
-        bpy.data.objects[gp_obj_name].select_set(False)
+    key_frame_animation(gp_obj_name, output_collection, layer,
+                        away_from_frame_distance, override_context)
 
-        hide_none_active_obj(output_collection)
+    bpy.context.scene.frame_set(0)
+    bpy.data.objects[gp_obj_name].select_set(False)
 
-        if MODE == "DEFAULT" or MODE == "GEOMETRY":
-            convert_curves_to_filled_mesh(output_collection, merge_distance,complex_convert)
+    hide_none_active_obj(output_collection)
 
-        elif MODE == "CURVES" and close_curves:
+    if MODE == "DEFAULT" or MODE == "GEOMETRY":
+        convert_curves_to_filled_mesh(
+            output_collection, merge_distance, complex_convert)
 
-            for obj in bpy.data.collections[output_collection].objects:
-                obj.select_set(True)
-                bpy.context.view_layer.objects.active = obj
+    elif MODE == "CURVES" and close_curves:
 
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.curve.select_all(action='SELECT')
-                bpy.ops.curve.cyclic_toggle()
-                bpy.ops.object.mode_set(mode='OBJECT')
+        for obj in bpy.data.collections[output_collection].objects:
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
 
-                obj.select_set(False)
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.curve.select_all(action='SELECT')
+            bpy.ops.curve.cyclic_toggle()
+            bpy.ops.object.mode_set(mode='OBJECT')
 
-        if MODE == "GEOMETRY" and not sub_layer == layer:
+            obj.select_set(False)
 
-            for obj in bpy.data.collections[output_collection].objects:
+    if MODE == "GEOMETRY" and not sub_layer == layer:
 
-                obj.select_set(True)
+        for obj in bpy.data.collections[output_collection].objects:
 
-                obj.modifiers.new(name='SOLIDIFY', type='SOLIDIFY')
-                obj.modifiers['SOLIDIFY'].offset = 0
-                obj.modifiers['SOLIDIFY'].thickness = extrusion_length
+            obj.select_set(True)
 
-                bpy.context.view_layer.objects.active = obj
-                bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
+            obj.modifiers.new(name='SOLIDIFY', type='SOLIDIFY')
+            obj.modifiers['SOLIDIFY'].offset = 0
+            obj.modifiers['SOLIDIFY'].thickness = extrusion_length
 
-                obj.select_set(False)
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
+
+            obj.select_set(False)
+
 
 def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_distance, override_context):
     prev_obj_name = ""
@@ -215,27 +224,27 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
     while True:
         name_of_GP_Stroke = bpy.context.object.data.name
 
-            # SETS THE ACTIVE LAYER ON GREASE PENCIL STROKE 
+        # SETS THE ACTIVE LAYER ON GREASE PENCIL STROKE
         bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[layer]
 
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
         bpy.ops.gpencil.convert(
-                override_context, type='CURVE', use_timing_data=False)
+            override_context, type='CURVE', use_timing_data=False)
 
         bpy.data.objects[gp_obj_name].select_set(False)
 
         obj_name = bpy.data.collections[output_collection].all_objects[current_object_index].name_full
-            
+
         try:
             bpy.data.collections[output_collection].objects[obj_name].hide_render = False
             bpy.data.collections[output_collection].objects[obj_name].keyframe_insert(
-                    "hide_render")
+                "hide_render")
         except:
             print("dont know error i gess")
 
         try:
             bpy.data.collections[output_collection].objects[obj_name].keyframe_insert(
-                    bpy.ops.transform.translate())
+                bpy.ops.transform.translate())
         except:
             print("dont know error i gess")
 
@@ -245,7 +254,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.data.objects[prev_obj_name].select_set(True)
                 bpy.data.collections[output_collection].objects[prev_obj_name].hide_render = True
                 bpy.data.collections[output_collection].objects[prev_obj_name].keyframe_insert(
-                        "hide_render")
+                    "hide_render")
                 bpy.data.objects[prev_obj_name].select_set(False)
         except:
             bpy.data.objects[prev_obj_name].select_set(False)
@@ -255,7 +264,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.data.objects[obj_name].select_set(False)
                 bpy.data.objects[prev_obj_name].select_set(True)
                 bpy.data.collections[output_collection].objects[prev_obj_name].keyframe_insert(
-                        bpy.ops.transform.translate(value=away_from_frame_distance))
+                    bpy.ops.transform.translate(value=away_from_frame_distance))
                 bpy.data.objects[prev_obj_name].select_set(False)
         except:
             bpy.data.objects[prev_obj_name].select_set(False)
@@ -271,7 +280,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
 
 def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collection='', sub_layer='', sub_layer_extrution_amount=1, sub_output_collection='',
-                 merge_distance=0.0100, auto_delete_sub_layers=False, close_curves=False, extrusion_length=0.01,complex_convert=False,repair_collection=""):
+                 merge_distance=0.0100, auto_delete_sub_layers=False, close_curves=False, extrusion_length=0.01, complex_convert=False, repair_collection=""):
 
     interpolation_type = 'CONSTANT'
 
@@ -284,10 +293,10 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
     start_frame = bpy.data.scenes[0].frame_current
 
     if not output_collection == "":
-        # THIS SET THE OUTPUT COLLECTION 
+        # THIS SET THE OUTPUT COLLECTION
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
-    if not MODE == "REPAIR" and not MODE == "LINE": 
+    if not MODE == "REPAIR" and not MODE == "LINE":
         convert_GP(
             gp_obj_name,
             output_collection,
@@ -296,7 +305,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             layer=regular_layer,
             extrusion_length=extrusion_length,
             complex_convert=complex_convert,
-            MODE = MODE)
+            MODE=MODE)
 
         if not sub_layer == '':
 
@@ -317,7 +326,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                 layer=sub_layer,
                 extrusion_length=extrusion_length,
                 complex_convert=complex_convert,
-                MODE = MODE)
+                MODE=MODE)
 
             for sub in bpy.data.collections[sub_output_collection].objects:
 
@@ -349,10 +358,11 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                         used_sub.append(sub.name)
 
                 bpy.ops.screen.keyframe_jump()
-
+        # TODO  :: THIS IS A DUMB WAY TO ITORATE THIS
         index = 0
         for obj in bpy.data.collections[output_collection].objects:
-            bpy.data.collections[output_collection].objects[index].select_set(True)
+            bpy.data.collections[output_collection].objects[index].select_set(
+                True)
             index += 1
 
         if not sub_layer == '':
@@ -373,11 +383,11 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             for obj in bpy.data.collections[sub_output_collection].objects:
                 obj.select_set(True)
                 bpy.ops.object.delete(use_global=False)
-                
+
     elif MODE == "REPAIR":
-        
+
         repair_frame = bpy.data.scenes[0].frame_current
-        
+
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[repair_collection]
         bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
         bpy.data.objects[gp_obj_name].select_set(True)
@@ -387,10 +397,11 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
         bpy.ops.gpencil.convert(type='PATH', use_timing_data=False)
 
-        convert_curves_to_filled_mesh(repair_collection, merge_distance,complex_convert)
-    
+        convert_curves_to_filled_mesh(
+            repair_collection, merge_distance, complex_convert)
+
     elif MODE == "LINE":
-        
+
         area_type = "VIEW_3D"
         area = [area for area in bpy.context.screen.areas if area.type == area_type][0]
 
@@ -403,27 +414,27 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
             override_context = context_swap("VIEW_3D")
 
-            while True: 
+            while True:
 
                 bpy.ops.gpencil.editmode_toggle()
 
                 window = bpy.context.window_manager.windows[0]
 
-                with bpy.context.temp_override(window=window,area=area):
+                with bpy.context.temp_override(window=window, area=area):
                     bpy.ops.gpencil.select_all(action='SELECT')
 
                 bpy.ops.gpencil.stroke_outline({
-                                                "area": area,
-                                                "window": bpy.context.window,
-                                                "screen": bpy.context.screen,
-                                                "region": area.regions[-1],
-                                                "scene": bpy.context.scene,
-                                                "space_data": area.spaces.active,
-                                                "active_object": bpy.data.objects[gp_obj_name],
-                                                "editable_gpencil_strokes": bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes,
-                                                "object": bpy.data.objects[gp_obj_name],
-                                                "selected_objects": [bpy.data.objects[gp_obj_name]]
-                                                })
+                    "area": area,
+                    "window": bpy.context.window,
+                    "screen": bpy.context.screen,
+                    "region": area.regions[-1],
+                    "scene": bpy.context.scene,
+                    "space_data": area.spaces.active,
+                    "active_object": bpy.data.objects[gp_obj_name],
+                    "editable_gpencil_strokes": bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes,
+                    "object": bpy.data.objects[gp_obj_name],
+                    "selected_objects": [bpy.data.objects[gp_obj_name]]
+                })
 
                 bpy.ops.gpencil.editmode_toggle()
 
@@ -432,23 +443,22 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                 if 'CANCELLED' in ret:
                     break
 
-
             bpy.data.scenes[0].frame_current = start_frame
 
             bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
             # TODO :TOGGLE CYCLICIC: MIGHT BE WAY FASTER BUT ALSO NEEDS TO RUN MORE CLEAN UP
-                
+
             for obj in bpy.data.objects:
                 obj.select_set(False)
-            
+
             override_context = context_swap("VIEW_3D")
-            key_frame_animation(gp_obj_name=gp_obj_name, output_collection=output_collection, layer=regular_layer, away_from_frame_distance=away_from_frame_distance, override_context=override_context)
+            key_frame_animation(gp_obj_name=gp_obj_name, output_collection=output_collection, layer=regular_layer,
+                                away_from_frame_distance=away_from_frame_distance, override_context=override_context)
 
-
-            convert_curves_to_filled_mesh(output_collection=output_collection,merge_distance=merge_distance,complex_convert=complex_convert)
+            convert_curves_to_filled_mesh(
+                output_collection=output_collection, merge_distance=merge_distance, complex_convert=complex_convert)
 
             bpy.context.scene.frame_set(start_frame)
 
             hide_none_active_obj(output_collection)
-

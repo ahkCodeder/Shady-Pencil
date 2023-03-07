@@ -17,7 +17,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
         col.prop(context.scene, 'MODE')
 
         props.MODE = context.scene.MODE
-
+         # TODO ADD SETT ALL VALUES TO DEFAULT VALUES SO YOU CAN CUT DOWEN THE AMOUINT OF CODE 
         if props.MODE == "DEFAULT":
 
             col.prop(context.scene, 'gp_obj_name')

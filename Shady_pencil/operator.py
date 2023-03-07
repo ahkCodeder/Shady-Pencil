@@ -9,7 +9,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     MODE: bpy.props.EnumProperty(items=[(
-        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR",""),("LINE","LINE","")])
+        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""), ("REPAIR", "REPAIR", ""), ("LINE", "LINE", "")])
 
     gp_obj_name: bpy.props.StringProperty(
         name="gp_obj_name",
@@ -140,7 +140,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                                       auto_delete_sub_layers=self.auto_delete_sub_layers,
                                       extrusion_length=self.extrusion_length,
                                       MODE=self.MODE, close_curves=self.close_curves,
-                                      complex_convert=self.complex_convert,repair_collection=self.repair_collection)
+                                      complex_convert=self.complex_convert, repair_collection=self.repair_collection)
 
             return {'FINISHED'}
 
