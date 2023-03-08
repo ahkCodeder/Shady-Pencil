@@ -80,20 +80,14 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
 
-        # TODO :: there has to be a better way to check for window types
-        is_area_OUTLINER = False
-        is_area_VIEW_3D = False
-        is_area_DOPESHEET_EDITOR = False
-
-        for area in bpy.context.screen.areas:
-            if area.type == "OUTLINER":
-                is_area_OUTLINER = True
-            if area.type == "VIEW_3D":
-                is_area_VIEW_3D = True
-            if area.type == "DOPESHEET_EDITOR":
-                is_area_DOPESHEET_EDITOR = True
-
-        if not (is_area_OUTLINER and is_area_VIEW_3D and is_area_DOPESHEET_EDITOR):
+        try:
+            [area for area in bpy.context.screen.areas if area.type == "OUTLINER"][0]
+            [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+            [area for area in bpy.context.screen.areas if area.type ==
+                "DOPESHEET_EDITOR"][0]
+        except:
+            # TODO :: IMP ERR LOGGING
+            print()
             return False
 
         try:
