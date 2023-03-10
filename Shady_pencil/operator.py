@@ -9,7 +9,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     MODE: bpy.props.EnumProperty(items=[(
-        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR",""),("LINE","LINE","")])
+        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""), ("REPAIR", "REPAIR", ""), ("LINE", "LINE", "")])
 
     gp_obj_name: bpy.props.StringProperty(
         name="gp_obj_name",
@@ -81,6 +81,17 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     def poll(cls, context):
 
         try:
+            [area for area in bpy.context.screen.areas if area.type == "OUTLINER"][0]
+            [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
+            [area for area in bpy.context.screen.areas if area.type ==
+                "DOPESHEET_EDITOR"][0]
+        except:
+            # TODO :: IMP ERR LOGGING
+            print(
+                "ONE OF THE AREA TYPES  NEED TO BE OPEN :: OUTLINER VIEW_3D DOPESHEET_EDITOR")
+            return False
+
+        try:
             bpy.data.collections[bpy.context.scene.output_collection]
             bpy.data.objects[bpy.context.scene.gp_obj_name]
 
@@ -124,7 +135,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                                       auto_delete_sub_layers=self.auto_delete_sub_layers,
                                       extrusion_length=self.extrusion_length,
                                       MODE=self.MODE, close_curves=self.close_curves,
-                                      complex_convert=self.complex_convert,repair_collection=self.repair_collection)
+                                      complex_convert=self.complex_convert, repair_collection=self.repair_collection)
 
             return {'FINISHED'}
 
