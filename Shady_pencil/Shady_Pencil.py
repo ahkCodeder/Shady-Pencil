@@ -358,19 +358,13 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                         used_sub.append(sub.name)
 
                 bpy.ops.screen.keyframe_jump()
-        # TODO  :: THIS IS A DUMB WAY TO ITORATE THIS
-        index = 0
+
         for obj in bpy.data.collections[output_collection].objects:
-            bpy.data.collections[output_collection].objects[index].select_set(
-                True)
-            index += 1
+            obj.select_set(True)
 
         if not sub_layer == '':
-            index = 0
             for obj in bpy.data.collections[sub_output_collection].objects:
-                bpy.data.collections[sub_output_collection].objects[index].select_set(
-                    True)
-                index += 1
+                obj.select_set(True)
 
         override_context = context_swap("DOPESHEET_EDITOR")
 
