@@ -1,4 +1,4 @@
-from Shady_pencil import operator, panel
+from . import operator, panel
 bl_info = {
     "name": "Shady Pencil",
     "author": "AHK <https://github.com/ahkCodeder>",
