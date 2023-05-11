@@ -142,15 +142,15 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             props.merge_distance = context.scene.merge_distance
 
         elif props.MODE == "REPAIR":
-            
+
             col.prop(context.scene, 'gp_obj_name')
 
             col.prop(context.scene, 'regular_layer')
-            
+
             col.prop(context.scene, 'complex_convert')
 
             col.prop(context.scene, 'repair_collection')
-            
+
             props.MODE = context.scene.MODE
 
             props.gp_obj_name = context.scene.gp_obj_name
@@ -161,13 +161,11 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 
             props.repair_collection = context.scene.repair_collection
 
-        
-
 
 def register():
 
     bpy.types.Scene.MODE = bpy.props.EnumProperty(items=[(
-        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""),("REPAIR","REPAIR",""),("LINE","LINE","")])
+        "DEFAULT", "DEFAULT", ""), ("CURVES", "CURVES", ""), ("GEOMETRY", "GEOMETRY", ""), ("REPAIR", "REPAIR", ""), ("LINE", "LINE", "")])
 
     bpy.types.Scene.gp_obj_name = bpy.props.StringProperty(
         name="gp_obj_name",

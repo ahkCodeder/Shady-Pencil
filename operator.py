@@ -86,7 +86,6 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             [area for area in bpy.context.screen.areas if area.type ==
                 "DOPESHEET_EDITOR"][0]
         except:
-            # TODO :: IMP ERR LOGGING
             print(
                 "ONE OF THE AREA TYPES  NEED TO BE OPEN :: OUTLINER VIEW_3D DOPESHEET_EDITOR")
             return False
