@@ -25,7 +25,7 @@ import bpy
 away_from_frame_distance = (0, 0, 10000000000)
 
 # NAME OF THE GPENCIL OBJECT YOU'RE
-gp_obj_name = 'SHADEING'
+#gp_obj_name = 'SHADEING'
 
 # layer in gpencil
 regular_layer = 'shadeing'
@@ -56,17 +56,17 @@ merge_distance = 0.0100
 auto_delete_sub_layers = False
 
 # DEBUG MODE
-#bpy.app.debug_wm = False
-
-# TODO :: ADD LINE MODE Fill __ tool has been improved adding a new algorithm to close gaps.
-# TODO :: UPDATE ALL INSTRUCTION AND WHAT YOU NEED TO DO TO RUN THE CODE IN THE README.MD UPLOAD FULL TUTORICAL WHEN ALL IS DONE
-# TODO :: REFACTOR AND ERROR FIXES  :: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
+# bpy.app.debug_wm = False
+# ! TODO :: START :: run the frame check in poll
+# TODO :: UPLOAD FULL TUTORICAL WHEN ALL IS DONE
+# TODO :: REFACTOR AND ERROR FIXES :: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
 """
 ############################ END OF SETTING VARIABLES ##################################
 """
 
 
-def convert_curves_to_filled_mesh(output_collection, merge_distance, complex_convert):
+def convert_curves_to_filled_mesh(gp_obj_name,output_collection, merge_angle, complex_convert):
+
     if complex_convert:
         for obj in bpy.data.collections[output_collection].objects:
 
@@ -77,8 +77,7 @@ def convert_curves_to_filled_mesh(output_collection, merge_distance, complex_con
                 bpy.ops.object.convert(target='MESH')
                 bpy.ops.object.editmode_toggle()
                 bpy.ops.mesh.select_all()
-                bpy.ops.mesh.remove_doubles(
-                    threshold=merge_distance, use_sharp_edge_from_normals=False)
+                bpy.ops.mesh.dissolve_limited(angle_limit=merge_angle)
                 bpy.ops.object.editmode_toggle()
                 bpy.context.view_layer.objects.active = obj
                 bpy.data.objects[obj.name].select_set(True)
@@ -114,8 +113,8 @@ def convert_curves_to_filled_mesh(output_collection, merge_distance, complex_con
                 bpy.ops.object.convert(target='MESH')
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_all(action='SELECT')
-                bpy.ops.mesh.remove_doubles(
-                    threshold=merge_distance, use_sharp_edge_from_normals=False)
+                bpy.ops.mesh.dissolve_limited(angle_limit=merge_angle)
+
 
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.ops.object.convert(target='CURVE')
@@ -169,7 +168,7 @@ def context_swap(area_type=""):
     return override_context
 
 
-def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_distance=0.0401, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE=""):
+def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_angle=0.0401, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE=""):
 
     override_context = context_swap("VIEW_3D")
 
@@ -186,7 +185,7 @@ def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTAN
 
     if MODE == "DEFAULT" or MODE == "GEOMETRY":
         convert_curves_to_filled_mesh(
-            output_collection, merge_distance, complex_convert)
+            gp_obj_name,output_collection, merge_angle, complex_convert)
 
     elif MODE == "CURVES" and close_curves:
 
@@ -280,16 +279,16 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
 
 def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collection='', sub_layer='', sub_layer_extrution_amount=1, sub_output_collection='',
-                 merge_distance=0.0100, auto_delete_sub_layers=False, close_curves=False, extrusion_length=0.01, complex_convert=False, repair_collection=""):
+                 merge_angle=0.0100, auto_delete_sub_layers=False, close_curves=False, extrusion_length=0.01, complex_convert=False, repair_collection=""):
 
     interpolation_type = 'CONSTANT'
 
     if not bpy.context.active_object == 'GPENCIL':
-
         print('FAIL NO GPENCIL OBJECT SELECTED')
-
+    
     bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
     bpy.data.objects[gp_obj_name].select_set(True)
+
     start_frame = bpy.data.scenes[0].frame_current
 
     if not output_collection == "":
@@ -301,7 +300,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             gp_obj_name,
             output_collection,
             interpolation_type,
-            merge_distance,
+            merge_angle,
             layer=regular_layer,
             extrusion_length=extrusion_length,
             complex_convert=complex_convert,
@@ -322,7 +321,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                 gp_obj_name,
                 sub_output_collection,
                 interpolation_type,
-                merge_distance,
+                merge_angle,
                 layer=sub_layer,
                 extrusion_length=extrusion_length,
                 complex_convert=complex_convert,
@@ -392,7 +391,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
         bpy.ops.gpencil.convert(type='PATH', use_timing_data=False)
 
         convert_curves_to_filled_mesh(
-            repair_collection, merge_distance, complex_convert)
+            gp_obj_name,repair_collection, merge_angle, complex_convert)
 
     elif MODE == "LINE":
 
@@ -451,7 +450,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                                 away_from_frame_distance=away_from_frame_distance, override_context=override_context)
 
             convert_curves_to_filled_mesh(
-                output_collection=output_collection, merge_distance=merge_distance, complex_convert=complex_convert)
+                gp_obj_name,output_collection=output_collection, merge_angle=merge_angle, complex_convert=complex_convert)
 
             bpy.context.scene.frame_set(start_frame)
 

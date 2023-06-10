@@ -48,8 +48,8 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
         description="name of the collection to output the repair frame",
         default="")
 
-    merge_distance: bpy.props.FloatProperty(
-        name="merge_distance",
+    merge_angle: bpy.props.FloatProperty(
+        name="merge_angle",
         description="controlls the detail of the mesh keep this number low it you want the out put to be good qualty",
         default=0.01,
         min=0.0,
@@ -80,6 +80,19 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
 
+        seleted_keyframes = []
+        for f in bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer].frames:
+                seleted_keyframes.append(int(f.frame_number))
+
+        is_on_existing_key_frame = False
+        for key_frame in seleted_keyframes:
+            if int(bpy.data.scenes[0].frame_current) == key_frame:
+                is_on_existing_key_frame = True
+
+        # TODO :: ADD POPUP WINDOW EXPLANEING WHAT HAPPEND
+        if not is_on_existing_key_frame:
+            return False
+    
         try:
             [area for area in bpy.context.screen.areas if area.type == "OUTLINER"][0]
             [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
@@ -130,7 +143,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                                       sub_layer=self.sub_layer,
                                       sub_layer_extrution_amount=self.sub_layer_extrution_amount,
                                       sub_output_collection=self.sub_output_collection,
-                                      merge_distance=self.merge_distance,
+                                      merge_angle=self.merge_angle,
                                       auto_delete_sub_layers=self.auto_delete_sub_layers,
                                       extrusion_length=self.extrusion_length,
                                       MODE=self.MODE, close_curves=self.close_curves,
