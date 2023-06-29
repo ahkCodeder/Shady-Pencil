@@ -1,5 +1,21 @@
 import bpy
 from . import Shady_Pencil
+import blf
+
+error_message = ""
+
+
+def draw_callback_px(self, context):
+    font_id = 0
+    blf.position(font_id, 15, 50, 0)
+    blf.size(font_id, 30, 90)
+    blf.color(font_id, 1.0, 0.0, 0.0, 1.0)
+    blf.draw(font_id, error_message)
+
+
+def register_draw_handler():
+    bpy.types.SpaceView3D.draw_handler_add(
+        draw_callback_px, (None, bpy.context), 'WINDOW', 'POST_PIXEL')
 
 
 class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
@@ -55,6 +71,13 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
         min=0.0,
         max=1.0)
 
+    merge_distance: bpy.props.FloatProperty(
+        name="merge_distance",
+        description="controlls the detail of the mesh keep this number low it you want the out put to be good qualty",
+        default=0.01,
+        min=0.0,
+        max=1.0)
+
     close_curves: bpy.props.BoolProperty(
         name="close_curves",
         description="this closes curves if selected",
@@ -78,59 +101,90 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
         default=False)
 
     @classmethod
-    def poll(cls, context):
+    def poll(self, context):
 
-        seleted_keyframes = []
-        for f in bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer].frames:
-                seleted_keyframes.append(int(f.frame_number))
+        global error_message
 
-        is_on_existing_key_frame = False
-        for key_frame in seleted_keyframes:
-            if int(bpy.data.scenes[0].frame_current) == key_frame:
-                is_on_existing_key_frame = True
-
-        # TODO :: ADD POPUP WINDOW EXPLANEING WHAT HAPPEND
-        if not is_on_existing_key_frame:
-            return False
-    
         try:
             [area for area in bpy.context.screen.areas if area.type == "OUTLINER"][0]
             [area for area in bpy.context.screen.areas if area.type == "VIEW_3D"][0]
             [area for area in bpy.context.screen.areas if area.type ==
                 "DOPESHEET_EDITOR"][0]
         except:
-            print(
-                "ONE OF THE AREA TYPES  NEED TO BE OPEN :: OUTLINER VIEW_3D DOPESHEET_EDITOR")
+            error_message = "you need to have OUTLINE and VIEW_3D and DOPSHEET_EDITOR open"
             return False
 
         try:
-            bpy.data.collections[bpy.context.scene.output_collection]
-            bpy.data.objects[bpy.context.scene.gp_obj_name]
+            bpy.data.grease_pencils[bpy.context.scene.gp_obj_name]
+        except:
+            error_message = "the given grease pencil object dose not exist"
+            return False
 
-            # Check to see if output collections are empty
+        try:
+            bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer]
+        except:
+            error_message = "the given regular layer dose not exist"
+            return False
+
+        try:
+
             if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0:
+
+                error_message = "youre output collection needs to be EMPTY"
                 return False
         except:
+
+            error_message = "probly gave the wrong name for output collection"
             return False
 
         try:
+            if bpy.context.scene.sub_output_collection != "":
 
-            if bpy.context.scene.sub_output_collection == '':
-                return True
+                if len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
 
-            elif len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
-                return False
+                    error_message = "youre sub output collection needs to be EMPTY"
+                    return False
         except:
+
+            error_message = "probly gave the wrong name for sub output collection needs to be EMPTY"
             return False
 
         try:
+            if bpy.context.scene.repair_collection != "":
 
-            if bpy.context.scene.repair_collection == '':
-                return True
+                if len(bpy.data.collections[bpy.context.scene.repair_collection].objects) > 0:
 
+                    error_message = "youre repair output collection needs to be EMPTY"
+                    return False
         except:
+
+            error_message = "probly gave the wrong name for repair output collection needs to be EMPTY"
             return False
 
+        if bpy.context.scene.repair_collection == "" and bpy.context.scene.sub_output_collection == "" and bpy.context.scene.output_collection == "":
+
+            error_message = "you NEED to pass one output collection"
+            return False
+
+        try:
+            seleted_keyframes = []
+            for f in bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer].frames:
+                seleted_keyframes.append(int(f.frame_number))
+
+            is_on_existing_key_frame = False
+            for key_frame in seleted_keyframes:
+                if int(bpy.data.scenes[0].frame_current) == key_frame:
+                    is_on_existing_key_frame = True
+
+            if not is_on_existing_key_frame:
+
+                error_message = "move the the frame to a exising key frame of youre Greace pencil object"
+                return False
+        except:
+            error_message = "this object has no key frames or SOMETHING ELSE went wrong"
+            return False
+
+        error_message = ""
         return True
 
     # SIMPLE JUST RUNS SOMETHING
@@ -144,6 +198,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                                       sub_layer_extrution_amount=self.sub_layer_extrution_amount,
                                       sub_output_collection=self.sub_output_collection,
                                       merge_angle=self.merge_angle,
+                                      merge_distance=self.merge_distance,
                                       auto_delete_sub_layers=self.auto_delete_sub_layers,
                                       extrusion_length=self.extrusion_length,
                                       MODE=self.MODE, close_curves=self.close_curves,
@@ -153,9 +208,16 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
 
         return {'CANCELED'}
 
+    def modal(self, context, event):
+        if event.type in {'ESC'}:
+            bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
+            return {'CANCELLED'}
+        return {'PASS_THROUGH'}
+
 
 def register():
 
+    register_draw_handler()
     bpy.utils.register_class(DATA_OT_GP_Shady_Pencil)
 
 
