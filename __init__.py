@@ -1,8 +1,8 @@
-from . import operator, panel
+from . import panel, shady_pencil_operator
 bl_info = {
     "name": "Shady Pencil",
     "author": "AHK <https://github.com/ahkCodeder>",
-    "version": (1, 0),
+    "version": (1, 3),
     "blender": (3, 3, 0),
     "category": "3D View",
     "location": "View3D",
@@ -14,13 +14,13 @@ bl_info = {
 
 def register():
 
-    operator.register()
+    shady_pencil_operator.register()
     panel.register()
 
 
 def unregister():
 
-    operator.unregister()
+    shady_pencil_operator.unregister()
     panel.unregister()
 
 

@@ -26,6 +26,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             col.prop(context.scene, 'sub_output_collection')
             col.prop(context.scene, 'sub_layer_extrution_amount')
             col.prop(context.scene, 'merge_angle')
+            col.prop(context.scene, 'merge_distance')
             col.prop(context.scene, 'complex_convert')
             col.prop(context.scene, 'auto_delete_sub_layers')
 
@@ -37,6 +38,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             props.sub_layer_extrution_amount = context.scene.sub_layer_extrution_amount
             props.sub_output_collection = context.scene.sub_output_collection
             props.merge_angle = context.scene.merge_angle
+            props.merge_distance = context.scene.merge_distance
             props.auto_delete_sub_layers = context.scene.auto_delete_sub_layers
             props.complex_convert = context.scene.complex_convert
 
@@ -52,7 +54,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             props.regular_layer = context.scene.regular_layer
             props.output_collection = context.scene.output_collection
             props.close_curves = context.scene.close_curves
-            
+
             # default values hardcode so that there is no unexpected code called
             props.sub_layer = ""
             props.sub_output_collection = ""
@@ -65,6 +67,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             col.prop(context.scene, 'complex_convert')
             col.prop(context.scene, 'extrusion_length')
             col.prop(context.scene, 'merge_angle')
+            col.prop(context.scene, 'merge_distance')
             col.prop(context.scene, 'sub_layer')
             col.prop(context.scene, 'sub_output_collection')
             col.prop(context.scene, 'sub_layer_extrution_amount')
@@ -75,6 +78,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             props.output_collection = context.scene.output_collection
             props.extrusion_length = context.scene.extrusion_length
             props.merge_angle = context.scene.merge_angle
+            props.merge_distance = context.scene.merge_distance
             props.complex_convert = context.scene.complex_convert
             props.sub_layer = context.scene.sub_layer
             props.sub_output_collection = context.scene.sub_output_collection
@@ -86,14 +90,15 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             col.prop(context.scene, 'regular_layer')
             col.prop(context.scene, 'output_collection')
             col.prop(context.scene, 'merge_angle')
+            col.prop(context.scene, 'merge_distance')
 
             props.MODE = context.scene.MODE
             props.gp_obj_name = context.scene.gp_obj_name
             props.regular_layer = context.scene.regular_layer
-            # TODO :TOGGLE CYCLICIC: UPDATE IT IN FUTURE WHERE FALSE RESULTS IN CYCLIC CLOSE CUREVES
             props.complex_convert = True
             props.output_collection = context.scene.output_collection
             props.merge_angle = context.scene.merge_angle
+            props.merge_distance = context.scene.merge_distance
 
         elif props.MODE == "REPAIR":
 
@@ -112,12 +117,12 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 def register():
 
     bpy.types.Scene.MODE = bpy.props.EnumProperty(items=[
-                                                        ("DEFAULT", "DEFAULT", ""),
-                                                        ("CURVES", "CURVES", ""),
-                                                        ("GEOMETRY", "GEOMETRY", ""),
-                                                        ("REPAIR", "REPAIR", ""),
-                                                        ("LINE", "LINE", "")
-                                                        ])
+        ("DEFAULT", "DEFAULT", ""),
+        ("CURVES", "CURVES", ""),
+        ("GEOMETRY", "GEOMETRY", ""),
+        ("REPAIR", "REPAIR", ""),
+        ("LINE", "LINE", "")
+    ])
 
     bpy.types.Scene.gp_obj_name = bpy.props.StringProperty(
         name="Grease Pencil Object Name",
@@ -155,6 +160,13 @@ def register():
         name="Repair Collection",
         description="name of the collection to output the repair frame",
         default="")
+
+    bpy.types.Scene.merge_distance = bpy.props.FloatProperty(
+        name="Merge Distance",
+        description="controlls the detail of the mesh keep this number low it you want the out put to be good qualty",
+        default=0.01,
+        min=0.0,
+        max=1.0)
 
     bpy.types.Scene.merge_angle = bpy.props.FloatProperty(
         name="Merge Angle",
@@ -205,6 +217,8 @@ def unregister():
     del bpy.types.Scene.repair_collection
 
     del bpy.types.Scene.sub_output_collection
+
+    del bpy.types.Scene.merge_distance
 
     del bpy.types.Scene.merge_angle
 

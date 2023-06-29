@@ -1,71 +1,21 @@
 import bpy
 
-"""
-########################## REQUIERMENTS ###########################################
-"""
-# 1 WINDOWS THAT NEED TO BE ACTIVLY OPENED
-
-# 3D VIEW
-# DOPE SHEET
-# OUTLINER
-
-# 2 SETTINGS NEED TO BE RIGHT FOR WITH WHAT YOU WANT AND THE RIGHT COLLECTIONS TO OUTPUT TO
-
-# 3 MAKE SURE YOU HAVE A STROKE ON THE START FRAME OF THE ANIMATION OR YOU CAN GET A CONTEXT ERROR
-
-"""
-########################## END OF REQUIERMENTS ###########################################
-"""
-
-"""
-############################ SETTING VARIABLES ####################################
-"""
-
-# CONTROLLS THE DISTANCE OBJECTS ARE MOVED AWAY FROM THE VIEW IF THEY ARE NOT HIDDEN
 away_from_frame_distance = (0, 0, 10000000000)
 
-# NAME OF THE GPENCIL OBJECT YOU'RE
-#gp_obj_name = 'SHADEING'
-
-# layer in gpencil
-regular_layer = 'shadeing'
-
-# IF NO NAME IS GIVEN IT WILL BE THE SAME WHERE IT GPENCIL IS IN
-output_collection = 'dss'
-
-# MAKE A SPERATE LAYER ON THE SAME GPENCIL THAT MAKES HOLES POSSIBLE
-sub_layer = ''
-
-# if the sub traction and makeing holes increase if or low if it dose not make the holes
-sub_layer_extrution_amount = 1
-
-# where the subtraction gets outputed to if in cluded
-sub_output_collection = ''
-
-# MODE BETWEEN THE FRAMES 'CONSTANT' TO GET A MORE ANIMATION LOOK TO IT
 interpolation_type = 'CONSTANT'
 
-# !!TIP!! :: IF YOU WANT MORE DETAIL IN THE OBJECTS LOWER THIS NUMBER AND CLOSE EVERY LINE
-# BY ZOOMING IN AND DRAWING A LINE OVER THE EXISTING LINES WHERE THEY CLOSE THEN RUN THE SCRIPT
-# ADJUST THE DETAIL OF THE OBJECT THAT GETST TRANSFORMED
-# 0.0200 fast but still looking good
-# 0.0100 and lower you need to have clean lines that are filled and close well
 merge_distance = 0.0100
 
-# if True then it will out delete the collections of subtraction layer
 auto_delete_sub_layers = False
 
-# DEBUG MODE
-# bpy.app.debug_wm = False
-# ! TODO :: START :: run the frame check in poll
+# TODO :: RESETS DEPENTEDNT ON PANEL MODE SELECTED to not get prblems wi5ht poll checks
+# TODO :: IF A STROKE IS CREATE INFRONT OF ALL ITS FRAMES THERE IS A ERROR CONVERTING
+
 # TODO :: UPLOAD FULL TUTORICAL WHEN ALL IS DONE
-# TODO :: REFACTOR AND ERROR FIXES :: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
-"""
-############################ END OF SETTING VARIABLES ##################################
-"""
+# TODO :: REFACTOR:: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
 
 
-def convert_curves_to_filled_mesh(gp_obj_name,output_collection, merge_angle, complex_convert):
+def convert_curves_to_filled_mesh(output_collection, merge_angle, merge_distance, complex_convert):
 
     if complex_convert:
         for obj in bpy.data.collections[output_collection].objects:
@@ -78,6 +28,7 @@ def convert_curves_to_filled_mesh(gp_obj_name,output_collection, merge_angle, co
                 bpy.ops.object.editmode_toggle()
                 bpy.ops.mesh.select_all()
                 bpy.ops.mesh.dissolve_limited(angle_limit=merge_angle)
+                bpy.ops.mesh.remove_doubles(threshold=merge_distance)
                 bpy.ops.object.editmode_toggle()
                 bpy.context.view_layer.objects.active = obj
                 bpy.data.objects[obj.name].select_set(True)
@@ -114,8 +65,7 @@ def convert_curves_to_filled_mesh(gp_obj_name,output_collection, merge_angle, co
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.dissolve_limited(angle_limit=merge_angle)
-
-
+                bpy.ops.mesh.remove_doubles(threshold=merge_distance)
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.ops.object.convert(target='CURVE')
                 bpy.ops.object.mode_set(mode='EDIT')
@@ -168,7 +118,7 @@ def context_swap(area_type=""):
     return override_context
 
 
-def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTANT', merge_angle=0.0401, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE=""):
+def convert_GP(gp_obj_name='', output_collection='', merge_angle=0.0401, merge_distance=0.01, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE="", close_curves=False):
 
     override_context = context_swap("VIEW_3D")
 
@@ -185,7 +135,7 @@ def convert_GP(gp_obj_name='', output_collection='', interpolation_type='CONSTAN
 
     if MODE == "DEFAULT" or MODE == "GEOMETRY":
         convert_curves_to_filled_mesh(
-            gp_obj_name,output_collection, merge_angle, complex_convert)
+            output_collection, merge_angle, merge_distance, complex_convert)
 
     elif MODE == "CURVES" and close_curves:
 
@@ -246,7 +196,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.ops.transform.translate())
         except:
             print("dont know error i gess")
-
+        #! THIS BLOCK CAN PROB REFACTOR
         try:
             if not prev_obj_name == "":
                 bpy.data.objects[obj_name].select_set(False)
@@ -267,7 +217,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.data.objects[prev_obj_name].select_set(False)
         except:
             bpy.data.objects[prev_obj_name].select_set(False)
-
+        #!
         bpy.data.objects[obj_name].select_set(False)
         current_object_index += 1
         prev_obj_name = obj_name
@@ -279,13 +229,13 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
 
 def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collection='', sub_layer='', sub_layer_extrution_amount=1, sub_output_collection='',
-                 merge_angle=0.0100, auto_delete_sub_layers=False, close_curves=False, extrusion_length=0.01, complex_convert=False, repair_collection=""):
+                 merge_angle=0.0100, auto_delete_sub_layers=False, merge_distance=0.01, extrusion_length=0.01, complex_convert=False, repair_collection="", close_curves=False):
 
     interpolation_type = 'CONSTANT'
-
+    print(gp_obj_name)
     if not bpy.context.active_object == 'GPENCIL':
         print('FAIL NO GPENCIL OBJECT SELECTED')
-    
+
     bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
     bpy.data.objects[gp_obj_name].select_set(True)
 
@@ -296,15 +246,18 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
     if not MODE == "REPAIR" and not MODE == "LINE":
+
         convert_GP(
-            gp_obj_name,
-            output_collection,
-            interpolation_type,
-            merge_angle,
+            gp_obj_name=gp_obj_name,
+            output_collection=output_collection,
+            merge_angle=merge_angle,
+            merge_distance=merge_distance,
             layer=regular_layer,
+            away_from_frame_distance=away_from_frame_distance,
             extrusion_length=extrusion_length,
             complex_convert=complex_convert,
-            MODE=MODE)
+            MODE=MODE,
+            close_curves=close_curves)
 
         if not sub_layer == '':
 
@@ -318,14 +271,16 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             bpy.data.scenes[0].frame_current = start_frame
 
             convert_GP(
-                gp_obj_name,
-                sub_output_collection,
-                interpolation_type,
-                merge_angle,
-                layer=sub_layer,
+                gp_obj_name=gp_obj_name,
+                output_collection=output_collection,
+                merge_angle=merge_angle,
+                merge_distance=merge_distance,
+                layer=regular_layer,
+                away_from_frame_distance=away_from_frame_distance,
                 extrusion_length=extrusion_length,
                 complex_convert=complex_convert,
-                MODE=MODE)
+                MODE=MODE,
+                close_curves=close_curves)
 
             for sub in bpy.data.collections[sub_output_collection].objects:
 
@@ -379,8 +334,6 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
     elif MODE == "REPAIR":
 
-        repair_frame = bpy.data.scenes[0].frame_current
-
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[repair_collection]
         bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
         bpy.data.objects[gp_obj_name].select_set(True)
@@ -391,7 +344,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
         bpy.ops.gpencil.convert(type='PATH', use_timing_data=False)
 
         convert_curves_to_filled_mesh(
-            gp_obj_name,repair_collection, merge_angle, complex_convert)
+            repair_collection, merge_angle, merge_distance, complex_convert)
 
     elif MODE == "LINE":
 
@@ -440,8 +393,6 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
             bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
-            # TODO :TOGGLE CYCLICIC: MIGHT BE WAY FASTER BUT ALSO NEEDS TO RUN MORE CLEAN UP
-
             for obj in bpy.data.objects:
                 obj.select_set(False)
 
@@ -450,7 +401,7 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                                 away_from_frame_distance=away_from_frame_distance, override_context=override_context)
 
             convert_curves_to_filled_mesh(
-                gp_obj_name,output_collection=output_collection, merge_angle=merge_angle, complex_convert=complex_convert)
+                output_collection=output_collection, merge_angle=merge_angle, merge_distance=merge_distance, complex_convert=complex_convert)
 
             bpy.context.scene.frame_set(start_frame)
 
