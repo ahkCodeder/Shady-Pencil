@@ -104,12 +104,16 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
 
             col.prop(context.scene, 'gp_obj_name')
             col.prop(context.scene, 'regular_layer')
+            col.prop(context.scene, 'merge_angle')
+            col.prop(context.scene, 'merge_distance')
             col.prop(context.scene, 'complex_convert')
             col.prop(context.scene, 'repair_collection')
 
             props.MODE = context.scene.MODE
             props.gp_obj_name = context.scene.gp_obj_name
             props.regular_layer = context.scene.regular_layer
+            props.merge_angle = context.scene.merge_angle
+            props.merge_distance = context.scene.merge_distance
             props.complex_convert = context.scene.complex_convert
             props.repair_collection = context.scene.repair_collection
 

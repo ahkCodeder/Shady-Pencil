@@ -126,40 +126,57 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             error_message = "the given regular layer dose not exist"
             return False
 
-        try:
-
-            if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0:
-
-                error_message = "youre output collection needs to be EMPTY"
+        if bpy.context.scene.MODE != "CURVES":
+            if bpy.context.scene.merge_angle == 0.0 and bpy.context.scene.merge_distance == 0.0:
+                error_message = "YOU NEED TO HAVE ONE OR BOTH MERGE ANGLE OR MERGE DISTANCE NOT TO BE 0.0"
                 return False
-        except:
 
-            error_message = "probly gave the wrong name for output collection"
-            return False
+        if bpy.context.scene.MODE != "REPAIR":
+            try:
 
-        try:
-            if bpy.context.scene.sub_output_collection != "":
+                if len(bpy.data.collections[bpy.context.scene.output_collection].objects) > 0:
 
-                if len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
-
-                    error_message = "youre sub output collection needs to be EMPTY"
+                    error_message = "youre output collection needs to be EMPTY"
                     return False
-        except:
+            except:
 
-            error_message = "probly gave the wrong name for sub output collection needs to be EMPTY"
-            return False
+                error_message = "probly gave the wrong name for output collection"
+                return False
 
-        try:
-            if bpy.context.scene.repair_collection != "":
+        if bpy.context.scene.MODE == "DEFAULT" or bpy.context.scene.MODE == "GEOMETRY":
+            try:
+                if bpy.context.scene.sub_output_collection != "":
 
-                if len(bpy.data.collections[bpy.context.scene.repair_collection].objects) > 0:
+                    if len(bpy.data.collections[bpy.context.scene.sub_output_collection].objects) > 0:
 
-                    error_message = "youre repair output collection needs to be EMPTY"
+                        error_message = "youre sub output collection needs to be EMPTY"
+                        return False
+
+                    try:
+                        bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.sub_layer]
+                    except:
+                        error_message = "the given sub layer dose not exist"
+                        return False
+            except:
+
+                error_message = "probly gave the wrong name for sub output collection needs to be EMPTY"
+                return False
+
+        if bpy.context.scene.MODE == "REPAIR":
+            try:
+                if bpy.context.scene.repair_collection != "":
+
+                    if len(bpy.data.collections[bpy.context.scene.repair_collection].objects) > 0:
+
+                        error_message = "youre repair output collection needs to be EMPTY"
+                        return False
+                else:
+                    error_message = "you need to give a repair output collection"
                     return False
-        except:
+            except:
 
-            error_message = "probly gave the wrong name for repair output collection needs to be EMPTY"
-            return False
+                error_message = "probly gave the wrong name for repair output collection needs to be EMPTY"
+                return False
 
         if bpy.context.scene.repair_collection == "" and bpy.context.scene.sub_output_collection == "" and bpy.context.scene.output_collection == "":
 
