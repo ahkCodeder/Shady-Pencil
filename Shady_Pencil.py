@@ -8,11 +8,10 @@ merge_distance = 0.0100
 
 auto_delete_sub_layers = False
 
-# TODO :: RESETS DEPENTEDNT ON PANEL MODE SELECTED to not get prblems wi5ht poll checks
+
 # TODO :: IF A STROKE IS CREATE INFRONT OF ALL ITS FRAMES THERE IS A ERROR CONVERTING
 
 # TODO :: UPLOAD FULL TUTORICAL WHEN ALL IS DONE
-# TODO :: REFACTOR:: THE KEYFRAMEING CAN BE EXTRACTED INTO A FUNCTION
 
 
 def convert_curves_to_filled_mesh(output_collection, merge_angle, merge_distance, complex_convert):
@@ -196,7 +195,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.ops.transform.translate())
         except:
             print("dont know error i gess")
-        #! THIS BLOCK CAN PROB REFACTOR
+
         try:
             if not prev_obj_name == "":
                 bpy.data.objects[obj_name].select_set(False)
@@ -217,7 +216,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.data.objects[prev_obj_name].select_set(False)
         except:
             bpy.data.objects[prev_obj_name].select_set(False)
-        #!
+
         bpy.data.objects[obj_name].select_set(False)
         current_object_index += 1
         prev_obj_name = obj_name
