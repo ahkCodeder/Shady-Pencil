@@ -10,7 +10,7 @@ auto_delete_sub_layers = False
 
 
 # TODO :: IF A STROKE IS CREATE INFRONT OF ALL ITS FRAMES THERE IS A ERROR CONVERTING
-
+#! WE KNOW THAT SUB WORKS FOR DEFUALT TAKE THE END OF DEAFAULT AND A GEOMETRY EXTUTION TO IT SIMPLE AS THAT WITH AT IF CHECK FOR GEOMETRY AND REMOVE THE WEIRD GEOMETRY
 # TODO :: UPLOAD FULL TUTORICAL WHEN ALL IS DONE
 
 
@@ -117,17 +117,22 @@ def context_swap(area_type=""):
     return override_context
 
 
-def convert_GP(gp_obj_name='', output_collection='', merge_angle=0.0401, merge_distance=0.01, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE="", close_curves=False):
+def convert_GP(gp_obj_name='', output_collection='', merge_angle=0.0401, merge_distance=0.01, layer='', away_from_frame_distance=away_from_frame_distance, extrusion_length=0.01, complex_convert=True, MODE="", close_curves=False, sub_layer="", start_frame=0):
 
     override_context = context_swap("VIEW_3D")
 
     if not 'FINISHED' in bpy.ops.object.mode_set(mode='OBJECT'):
         print('FAILED TO ENTER OBJECT MODE')
 
-    key_frame_animation(gp_obj_name, output_collection, layer,
-                        away_from_frame_distance, override_context)
+    if sub_layer != "":
 
-    bpy.context.scene.frame_set(0)
+        key_frame_animation(gp_obj_name, output_collection, sub_layer,
+                            away_from_frame_distance, override_context)
+    else:
+        key_frame_animation(gp_obj_name, output_collection, layer,
+                            away_from_frame_distance, override_context)
+    # ? USE START_FRAME INSTEAD OF ZERO
+    bpy.context.scene.frame_set(start_frame)
     bpy.data.objects[gp_obj_name].select_set(False)
 
     hide_none_active_obj(output_collection)
@@ -146,21 +151,6 @@ def convert_GP(gp_obj_name='', output_collection='', merge_angle=0.0401, merge_d
             bpy.ops.curve.select_all(action='SELECT')
             bpy.ops.curve.cyclic_toggle()
             bpy.ops.object.mode_set(mode='OBJECT')
-
-            obj.select_set(False)
-
-    if MODE == "GEOMETRY" and not sub_layer == layer:
-
-        for obj in bpy.data.collections[output_collection].objects:
-
-            obj.select_set(True)
-
-            obj.modifiers.new(name='SOLIDIFY', type='SOLIDIFY')
-            obj.modifiers['SOLIDIFY'].offset = 0
-            obj.modifiers['SOLIDIFY'].thickness = extrusion_length
-
-            bpy.context.view_layer.objects.active = obj
-            bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
 
             obj.select_set(False)
 
@@ -255,10 +245,12 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             away_from_frame_distance=away_from_frame_distance,
             extrusion_length=extrusion_length,
             complex_convert=complex_convert,
+            sub_layer="",
             MODE=MODE,
-            close_curves=close_curves)
+            close_curves=close_curves,
+            start_frame=start_frame)
 
-        if not sub_layer == '':
+        if sub_layer != '':
 
             bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
             bpy.data.objects[gp_obj_name].select_set(True)
@@ -271,15 +263,17 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
             convert_GP(
                 gp_obj_name=gp_obj_name,
-                output_collection=output_collection,
+                output_collection=sub_output_collection,
                 merge_angle=merge_angle,
                 merge_distance=merge_distance,
                 layer=regular_layer,
                 away_from_frame_distance=away_from_frame_distance,
                 extrusion_length=extrusion_length,
                 complex_convert=complex_convert,
+                sub_layer=sub_layer,
                 MODE=MODE,
-                close_curves=close_curves)
+                close_curves=close_curves,
+                start_frame=start_frame)
 
             for sub in bpy.data.collections[sub_output_collection].objects:
 
@@ -330,6 +324,21 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             for obj in bpy.data.collections[sub_output_collection].objects:
                 obj.select_set(True)
                 bpy.ops.object.delete(use_global=False)
+
+        # EXTRUDES MESH
+        if MODE == "GEOMETRY":
+            for obj in bpy.data.collections[output_collection].objects:
+
+                obj.select_set(True)
+
+                obj.modifiers.new(name='SOLIDIFY', type='SOLIDIFY')
+                obj.modifiers['SOLIDIFY'].offset = 0
+                obj.modifiers['SOLIDIFY'].thickness = extrusion_length
+
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
+
+                obj.select_set(False)
 
     elif MODE == "REPAIR":
 
