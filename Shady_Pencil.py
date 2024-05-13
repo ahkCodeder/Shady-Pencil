@@ -6,8 +6,7 @@ interpolation_type = 'CONSTANT'
 
 merge_distance = 0.0100
 
-auto_delete_sub_layers = False
-
+auto_delete_sub_layers = ""
 
 # TODO :: IF A STROKE IS CREATE INFRONT OF ALL ITS FRAMES THERE IS A ERROR CONVERTING
 #! WE KNOW THAT SUB WORKS FOR DEFUALT TAKE THE END OF DEAFAULT AND A GEOMETRY EXTUTION TO IT SIMPLE AS THAT WITH AT IF CHECK FOR GEOMETRY AND REMOVE THE WEIRD GEOMETRY
@@ -166,8 +165,8 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
         bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[layer]
 
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
-        bpy.ops.gpencil.convert(
-            override_context, type='CURVE', use_timing_data=False)
+        with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
+            bpy.ops.gpencil.convert(type='CURVE', use_timing_data=False)
 
         bpy.data.objects[gp_obj_name].select_set(False)
 
@@ -315,15 +314,9 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
         override_context = context_swap("DOPESHEET_EDITOR")
 
-        bpy.ops.action.select_all(override_context, action='SELECT')
-        bpy.ops.action.interpolation_type(
-            override_context, type=interpolation_type)
-
-        if auto_delete_sub_layers:
-
-            for obj in bpy.data.collections[sub_output_collection].objects:
-                obj.select_set(True)
-                bpy.ops.object.delete(use_global=False)
+        with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
+            bpy.ops.action.select_all(action='SELECT')
+            bpy.ops.action.interpolation_type( type=interpolation_type)
 
         # EXTRUDES MESH
         if MODE == "GEOMETRY":
@@ -339,6 +332,22 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
                 bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
 
                 obj.select_set(False)
+        
+        #! CLEAN      
+        if auto_delete_sub_layers and ( MODE == "GEOMETRY" or MODE == "DEFAULT" ):
+            for obj in bpy.data.collections[output_collection].objects:
+                try:
+                    obj.select_set(False)
+                except:
+                    print("error :: failed to deselect obj in output_collection")
+            obj_arr = []
+            try: 
+                obj_arr.extend(bpy.data.collections[sub_output_collection].objects)
+            except:
+                print("err :: extend on sub collection")
+            with bpy.context.temp_override(selected_objects=obj_arr):
+                
+                bpy.ops.object.delete()
 
     elif MODE == "REPAIR":
 
@@ -356,9 +365,6 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
     elif MODE == "LINE":
 
-        area_type = "VIEW_3D"
-        area = [area for area in bpy.context.screen.areas if area.type == area_type][0]
-
         if (bpy.context.blend_data.version[0] >= 3 and bpy.context.blend_data.version[1] >= 4) or bpy.context.blend_data.version[0] >= 4:
 
             bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
@@ -372,23 +378,11 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
                 bpy.ops.gpencil.editmode_toggle()
 
-                window = bpy.context.window_manager.windows[0]
-
-                with bpy.context.temp_override(window=window, area=area):
+                with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
                     bpy.ops.gpencil.select_all(action='SELECT')
-
-                bpy.ops.gpencil.stroke_outline({
-                    "area": area,
-                    "window": bpy.context.window,
-                    "screen": bpy.context.screen,
-                    "region": area.regions[-1],
-                    "scene": bpy.context.scene,
-                    "space_data": area.spaces.active,
-                    "active_object": bpy.data.objects[gp_obj_name],
-                    "editable_gpencil_strokes": bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes,
-                    "object": bpy.data.objects[gp_obj_name],
-                    "selected_objects": [bpy.data.objects[gp_obj_name]]
-                })
+                
+                with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region'],editable_gpencil_strokes = bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes):
+                    bpy.ops.gpencil.stroke_outline()
 
                 bpy.ops.gpencil.editmode_toggle()
 
