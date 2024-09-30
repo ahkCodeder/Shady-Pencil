@@ -7,6 +7,16 @@ convert blender grease pencil animations to mesh animations to use the shader ed
 try it for free then if you want to sponsor you can use the link
 [**BLENDER MARKET**](https://blendermarket.com/products/grease-pencil-into-mesh-animations)
 
+## how to avoid known errors
+
+error when restarting an old project it can happen that it worked before to transform the grease-pencil strokes but not the button is grayed out - have autokeyframe on and copy the stroke then fill in the name of the new stroke f.e greasepencil.001 as the grease pencil object name this might fix it
+
+error if the grease-pencil object is not created on a keyframe "have auto-keyframe" when createing the grease-pencil object will fix this, otherwise only one stroke will turn into a mesh and not multiple frames
+
+error if the grase-pencil stroke is create infront of existing frames it crashes
+
+error if there is no grease pencil "stroke" but there is a key-frame on the time line it crashes 
+
 ## **WARNING**
 
 ** IMPORTANT NEW UPDATE WATCH THE VIDEO IN HOW TO USE IF IT'S NOT WORKING FOR YOU MIGTH HELP **
