@@ -12,7 +12,6 @@ auto_delete_sub_layers = ""
 #! WE KNOW THAT SUB WORKS FOR DEFUALT TAKE THE END OF DEAFAULT AND A GEOMETRY EXTUTION TO IT SIMPLE AS THAT WITH AT IF CHECK FOR GEOMETRY AND REMOVE THE WEIRD GEOMETRY
 # TODO :: UPLOAD FULL TUTORICAL WHEN ALL IS DONE
 
-
 def convert_curves_to_filled_mesh(output_collection, merge_angle, merge_distance, complex_convert):
 
     if complex_convert:
@@ -160,13 +159,21 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
     while True:
         name_of_GP_Stroke = bpy.context.object.data.name
+        
+        for obj in bpy.context.object.data.layers:
+            obj.hide = True
 
-        # SETS THE ACTIVE LAYER ON GREASE PENCIL STROKE
-        bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[layer]
+        bpy.context.object.data.layers[layer].hide = False
 
-        bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
         with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
-            bpy.ops.gpencil.convert(type='CURVE', use_timing_data=False)
+            bpy.ops.object.convert(target='MESH',keep_original=True, merge_customdata=False)
+            bpy.ops.object.convert(target='CURVE')
+        
+        bpy.data.collections[output_collection].objects.link(bpy.context.object)
+        bpy.ops.object.make_local()
+        # FIX start here :: COLLECTION HARDCODED THIS SHOULD BE THE ONLY COLLETION THAT HOLD ORIGINAL STROKE AND THE CREATE ONE IN ONE COLLEXTION 
+        
+        bpy.data.collections['Collection'].objects.unlink(bpy.context.object)
 
         bpy.data.objects[gp_obj_name].select_set(False)
 
@@ -174,16 +181,16 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
         try:
             bpy.data.collections[output_collection].objects[obj_name].hide_render = False
-            bpy.data.collections[output_collection].objects[obj_name].keyframe_insert(
-                "hide_render")
+            bpy.data.collections[output_collection].objects[obj_name].keyframe_insert("hide_render")
         except:
-            print("dont know error i gess")
+            print("i assume the error happens here")
 
         try:
-            bpy.data.collections[output_collection].objects[obj_name].keyframe_insert(
-                bpy.ops.transform.translate())
+            # fix this line 
+            bpy.ops.transform.translate(value=(0, 0, 0), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
+           # bpy.data.collections[output_collection].objects[obj_name].keyframe_insert(bpy.ops.transform.translate())
         except:
-            print("dont know error i gess")
+            print("so is it this line of codso is it this line of codee")
 
         try:
             if not prev_obj_name == "":
@@ -205,11 +212,12 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
                 bpy.data.objects[prev_obj_name].select_set(False)
         except:
             bpy.data.objects[prev_obj_name].select_set(False)
-
+        
         bpy.data.objects[obj_name].select_set(False)
         current_object_index += 1
         prev_obj_name = obj_name
         bpy.data.objects[gp_obj_name].select_set(True)
+        bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
         ret = bpy.ops.screen.keyframe_jump(next=True)
 
         if 'CANCELLED' in ret:
@@ -217,7 +225,7 @@ def key_frame_animation(gp_obj_name, output_collection, layer, away_from_frame_d
 
 
 def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collection='', sub_layer='', sub_layer_extrution_amount=1, sub_output_collection='',
-                 merge_angle=0.0100, auto_delete_sub_layers=False, merge_distance=0.01, extrusion_length=0.01, complex_convert=False, repair_collection="", close_curves=False):
+                 merge_angle=0.0100, auto_delete_sub_layers=False, auto_remove_vertices_and_faces=False, merge_distance=0.01, extrusion_length=0.01, complex_convert=False, repair_collection="", close_curves=False):
 
     interpolation_type = 'CONSTANT'
     print(gp_obj_name)
@@ -285,7 +293,15 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
             for obj in bpy.data.collections[output_collection].objects:
 
+                obj.modifiers.new(name='SOLIDIFY', type='SOLIDIFY')
+                obj.modifiers['SOLIDIFY'].offset = 0
+                obj.modifiers['SOLIDIFY'].thickness = extrusion_length
+
+                bpy.context.view_layer.objects.active = obj 
+                bpy.ops.object.modifier_apply(modifier="SOLIDIFY")
+
                 obj.modifiers.new("BOOLEAN", "BOOLEAN")
+                bpy.context.object.modifiers["BOOLEAN"].solver = 'EXACT'
 
             used_sub = []
             bpy.ops.screen.frame_jump()
@@ -333,32 +349,22 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
 
                 obj.select_set(False)
         
-        #! CLEAN      
-        if auto_delete_sub_layers and ( MODE == "GEOMETRY" or MODE == "DEFAULT" ):
-            for obj in bpy.data.collections[output_collection].objects:
-                try:
-                    obj.select_set(False)
-                except:
-                    print("error :: failed to deselect obj in output_collection")
-            obj_arr = []
-            try: 
-                obj_arr.extend(bpy.data.collections[sub_output_collection].objects)
-            except:
-                print("err :: extend on sub collection")
-            with bpy.context.temp_override(selected_objects=obj_arr):
-                
-                bpy.ops.object.delete()
+        clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collection,regular_layer,sub_layer,sub_output_collection,MODE,gp_obj_name)
+       
 
     elif MODE == "REPAIR":
+
 
         bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[repair_collection]
         bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
         bpy.data.objects[gp_obj_name].select_set(True)
+        #start here :: both layes get converted into mesh
 
-        name_of_GP_Stroke = bpy.context.object.data.name
-        bpy.data.grease_pencils[name_of_GP_Stroke].layers.active = bpy.data.grease_pencils[name_of_GP_Stroke].layers[regular_layer]
+        name_of_gp_stroke = bpy.context.object.data.name
+        bpy.data.grease_pencils_v3[name_of_gp_stroke].layers.active = bpy.data.grease_pencils_v3[name_of_gp_stroke].layers[regular_layer]
 
-        bpy.ops.gpencil.convert(type='PATH', use_timing_data=False)
+        bpy.ops.object.convert(target='CURVE')
+        # bpy.ops.gpencil.convert(type='path', use_timing_data=False)
 
         convert_curves_to_filled_mesh(
             repair_collection, merge_angle, merge_distance, complex_convert)
@@ -368,27 +374,27 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
         if (bpy.context.blend_data.version[0] >= 3 and bpy.context.blend_data.version[1] >= 4) or bpy.context.blend_data.version[0] >= 4:
 
             bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
-            bpy.data.objects[gp_obj_name].select_set(True)
+            bpy.data.objects[gp_obj_name].select_set(true)
 
-            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.mode_set(mode='object')
 
-            override_context = context_swap("VIEW_3D")
+            override_context = context_swap("view_3d")
 
-            while True:
+            while true:
 
                 bpy.ops.gpencil.editmode_toggle()
 
                 with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
-                    bpy.ops.gpencil.select_all(action='SELECT')
+                    bpy.ops.gpencil.select_all(action='select')
                 
                 with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region'],editable_gpencil_strokes = bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes):
                     bpy.ops.gpencil.stroke_outline()
 
                 bpy.ops.gpencil.editmode_toggle()
 
-                ret = bpy.ops.screen.keyframe_jump(next=True)
+                ret = bpy.ops.screen.keyframe_jump(next=true)
 
-                if 'CANCELLED' in ret:
+                if 'cancelled' in ret:
                     break
 
             bpy.data.scenes[0].frame_current = start_frame
@@ -396,9 +402,9 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
 
             for obj in bpy.data.objects:
-                obj.select_set(False)
+                obj.select_set(false)
 
-            override_context = context_swap("VIEW_3D")
+            override_context = context_swap("view_3d")
             key_frame_animation(gp_obj_name=gp_obj_name, output_collection=output_collection, layer=regular_layer,
                                 away_from_frame_distance=away_from_frame_distance, override_context=override_context)
 
@@ -408,3 +414,40 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             bpy.context.scene.frame_set(start_frame)
 
             hide_none_active_obj(output_collection)
+
+
+def clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collection,regular_layer,sub_layer,sub_output_collection,MODE,gp_obj_name):
+    if auto_delete_sub_layers and ( MODE == "GEOMETRY" or MODE == "DEFAULT" ):
+        for obj in bpy.data.collections[output_collection].objects:
+            try:
+                obj.select_set(false)
+            except:
+                print("error :: failed to deselect obj in output_collection")
+        obj_arr = []
+        try: 
+            obj_arr.extend(bpy.data.collections[sub_output_collection].objects)
+        except:
+            print("err :: extend on sub collection")
+        with bpy.context.temp_override(selected_objects=obj_arr):
+            
+            bpy.ops.object.delete()
+
+    if MODE == "DEFAULT" and auto_remove_vertices_and_faces:   
+        print("this is running ther auto clean")
+        for obj in bpy.data.collections[output_collection].objects:
+            bpy.data.objects[obj.name].select_set(True)
+            bpy.context.view_layer.objects.active = obj
+
+            bpy.ops.object.convert(target='MESH')
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all()
+            bpy.ops.mesh.remove_doubles(threshold=0.002)
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.delete(type='ONLY_FACE')
+            bpy.ops.object.editmode_toggle()
+
+    bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
+    bpy.data.objects[gp_obj_name].select_set(True)
+    for obj in bpy.context.object.data.layers:
+        obj.hide = False

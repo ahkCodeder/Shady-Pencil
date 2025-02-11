@@ -29,6 +29,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             col.prop(context.scene, 'merge_distance')
             col.prop(context.scene, 'complex_convert')
             col.prop(context.scene, 'auto_delete_sub_layers')
+            col.prop(context.scene, 'auto_remove_vertices_and_faces')
 
             props.MODE = context.scene.MODE
             props.gp_obj_name = context.scene.gp_obj_name
@@ -40,6 +41,7 @@ class VIEW3D_PT_GP_Shady_Pencil(bpy.types.Panel):
             props.merge_angle = context.scene.merge_angle
             props.merge_distance = context.scene.merge_distance
             props.auto_delete_sub_layers = context.scene.auto_delete_sub_layers
+            props.auto_remove_vertices_and_faces = context.scene.auto_remove_vertices_and_faces
             props.complex_convert = context.scene.complex_convert
 
         elif props.MODE == "CURVES":
@@ -183,6 +185,12 @@ def register():
         name="Auto Delete Subtraction Layer",
         description="this auto deletes the subtract layer",
         default=False)
+    
+    bpy.types.Scene.auto_remove_vertices_and_faces = bpy.props.BoolProperty(
+            name="Auto Remove Vertices And Faces",
+            description="this auto deletes Vertices and faces",
+            default=False
+            )
 
     bpy.types.Scene.close_curves = bpy.props.BoolProperty(
         name="Close Curves",
@@ -227,6 +235,8 @@ def unregister():
     del bpy.types.Scene.merge_angle
 
     del bpy.types.Scene.auto_delete_sub_layers
+
+    del bpy.types.Scene.auto_remove_vertices_and_faces
 
     del bpy.types.Scene.close_curves
 

@@ -71,6 +71,11 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
         description="this auto deletes the subtract layer",
         default=False)
 
+    auto_remove_vertices_and_faces: bpy.props.BoolProperty(
+            name="auto_remove_vertices_and_faces",
+            description="this auto deletes all verices and faces",
+            default=False)
+
     extrusion_length: bpy.props.FloatProperty(
         name="extrusion_length",
         description="controlls the leght you want the regular layer extend in the normal direction",
@@ -100,7 +105,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             return False
 
         try:
-            bpy.data.grease_pencils[bpy.context.scene.gp_obj_name]
+            bpy.data.grease_pencils_v3[bpy.data.objects[bpy.context.scene.gp_obj_name].data.id_data.name_full]
         except:
             
             error_message = "the given grease pencil object dose not exist"
@@ -108,7 +113,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
             return False
 
         try:
-            bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer]
+            bpy.data.grease_pencils_v3[bpy.data.objects[bpy.context.scene.gp_obj_name].data.id_data.name_full].layers[bpy.context.scene.regular_layer]   
         except:
             error_message = "the given regular layer dose not exist"
             cls.poll_message_set(error_message)
@@ -145,7 +150,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                         return False
 
                     try:
-                        bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.sub_layer]
+                        bpy.data.grease_pencils_v3[bpy.data.objects[bpy.context.scene.gp_obj_name].data.id_data.name_full].layers[bpy.context.scene.sub_layer]
                     except:
                         error_message = "the given sub layer dose not exist"
                         cls.poll_message_set(error_message)
@@ -183,7 +188,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
 
         try:
             seleted_keyframes = []
-            for f in bpy.data.grease_pencils[bpy.context.scene.gp_obj_name].layers[bpy.context.scene.regular_layer].frames:
+            for f in bpy.data.grease_pencils_v3[bpy.data.objects[bpy.context.scene.gp_obj_name].data.id_data.name_full].layers[bpy.context.scene.regular_layer].frames:
                 seleted_keyframes.append(int(f.frame_number))
 
             is_on_existing_key_frame = False
@@ -217,6 +222,7 @@ class DATA_OT_GP_Shady_Pencil(bpy.types.Operator):
                                       merge_angle=self.merge_angle,
                                       merge_distance=self.merge_distance,
                                       auto_delete_sub_layers=self.auto_delete_sub_layers,
+                                      auto_remove_vertices_and_faces=self.auto_remove_vertices_and_faces,
                                       extrusion_length=self.extrusion_length,
                                       MODE=self.MODE, close_curves=self.close_curves,
                                       complex_convert=self.complex_convert, repair_collection=self.repair_collection)
