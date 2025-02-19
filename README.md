@@ -1,5 +1,5 @@
 # Shady-Pencil
-**CURRENT VERSION REPAIR AND LINE MODE BROKE**
+**CURRENT VERSION REPAIR BROKE**
 convert blender grease pencil animations to mesh animations to use the shader editor
 
 ## **IF YOU WANT TO SPONSOR THIS PROJECT**
