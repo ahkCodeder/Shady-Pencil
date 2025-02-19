@@ -363,48 +363,40 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
         name_of_gp_stroke = bpy.context.object.data.name
         bpy.data.grease_pencils_v3[name_of_gp_stroke].layers.active = bpy.data.grease_pencils_v3[name_of_gp_stroke].layers[regular_layer]
 
-        bpy.ops.object.convert(target='CURVE')
+        for obj in bpy.data.grease_pencils_v3[name_of_gp_stroke].layers:
+            obj.hide = True
+
+        bpy.data.grease_pencils_v3[name_of_gp_stroke].layers[regular_layer].hide = False
+
+        bpy.ops.object.convert(target='URVE')
         # bpy.ops.gpencil.convert(type='path', use_timing_data=False)
 
         convert_curves_to_filled_mesh(
             repair_collection, merge_angle, merge_distance, complex_convert)
+        
+        clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collection,regular_layer,sub_layer,sub_output_collection,MODE,gp_obj_name)
 
     elif MODE == "LINE":
 
         if (bpy.context.blend_data.version[0] >= 3 and bpy.context.blend_data.version[1] >= 4) or bpy.context.blend_data.version[0] >= 4:
 
             bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
-            bpy.data.objects[gp_obj_name].select_set(true)
+            bpy.data.objects[gp_obj_name].select_set(True)
 
-            bpy.ops.object.mode_set(mode='object')
+            try:
+                bpy.ops.object.mode_set(mode='OBJECT')
+            except:
+                print("failed to enter object mode")
 
-            override_context = context_swap("view_3d")
+            bpy.data.objects[gp_obj_name].select_set(True)
+            bpy.ops.object.modifier_add(type='GREASE_PENCIL_OUTLINE')
 
-            while true:
+            for obj in bpy.context.object.data.layers:
+                obj.hide = True
+            
+            bpy.context.object.data.layers[regular_layer].hide = False
 
-                bpy.ops.gpencil.editmode_toggle()
-
-                with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
-                    bpy.ops.gpencil.select_all(action='select')
-                
-                with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region'],editable_gpencil_strokes = bpy.data.objects[gp_obj_name].data.layers[regular_layer].frames[0].strokes):
-                    bpy.ops.gpencil.stroke_outline()
-
-                bpy.ops.gpencil.editmode_toggle()
-
-                ret = bpy.ops.screen.keyframe_jump(next=true)
-
-                if 'cancelled' in ret:
-                    break
-
-            bpy.data.scenes[0].frame_current = start_frame
-
-            bpy.data.scenes[bpy.context.scene.name_full].view_layers[bpy.context.view_layer.name].active_layer_collection = bpy.context.window.view_layer.layer_collection.children[output_collection]
-
-            for obj in bpy.data.objects:
-                obj.select_set(false)
-
-            override_context = context_swap("view_3d")
+            override_context = context_swap("VIEW_3D")
             key_frame_animation(gp_obj_name=gp_obj_name, output_collection=output_collection, layer=regular_layer,
                                 away_from_frame_distance=away_from_frame_distance, override_context=override_context)
 
@@ -414,7 +406,15 @@ def Shady_Pencil(MODE="DEFAULT", gp_obj_name='', regular_layer='', output_collec
             bpy.context.scene.frame_set(start_frame)
 
             hide_none_active_obj(output_collection)
+            
+            for obj in bpy.data.collections[output_collection].objects:
+                obj.select_set(True)
 
+            override_context = context_swap("DOPESHEET_EDITOR")
+            with bpy.context.temp_override(window=override_context['window'],area=override_context['area'],region=override_context['region']):
+                bpy.ops.action.select_all(action='SELECT')
+                bpy.ops.action.interpolation_type(type='CONSTANT')
+            clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collection,regular_layer,sub_layer,sub_output_collection,MODE,gp_obj_name)
 
 def clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collection,regular_layer,sub_layer,sub_output_collection,MODE,gp_obj_name):
     if auto_delete_sub_layers and ( MODE == "GEOMETRY" or MODE == "DEFAULT" ):
@@ -449,5 +449,5 @@ def clean_up(auto_remove_vertices_and_faces,auto_delete_sub_layers,output_collec
 
     bpy.context.view_layer.objects.active = bpy.data.objects[gp_obj_name]
     bpy.data.objects[gp_obj_name].select_set(True)
-    for obj in bpy.context.object.data.layers:
+    for obj in bpy.data.objects[gp_obj_name].data.layers:
         obj.hide = False
